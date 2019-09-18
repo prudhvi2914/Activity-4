@@ -24,8 +24,11 @@ import org.robolectric.shadows.ShadowActivity;
 import org.robolectric.shadows.ShadowToast;
 
 import android.support.v7.widget.Toolbar;
+import android.widget.ImageView;
 
 @RunWith(RobolectricTestRunner.class)
+//@Config(constants = BuildConfig.class)
+
 
 public class MainActivityTest {
 
@@ -44,7 +47,14 @@ public class MainActivityTest {
         assertNotNull(activity);
     }
 
-
+    @Test
+    public void testButtonClickShouldShowToast() throws Exception {
+        MainActivity activity = Robolectric.buildActivity(MainActivity.class).create().get();
+        ImageView view = (ImageView) activity.findViewById(R.id.froyo);
+        assertNotNull(view);
+        view.performClick();
+        assertThat(ShadowToast.getTextOfLatestToast(), equalTo("You ordered a FroYo.") );
+    }
 
 
 }
