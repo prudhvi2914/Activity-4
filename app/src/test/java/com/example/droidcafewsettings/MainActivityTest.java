@@ -3,8 +3,10 @@ package com.example.droidcafewsettings;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.AppCompatImageView;
 import android.view.Menu;
+import android.view.View;
 import android.widget.Button;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -29,7 +31,9 @@ import org.robolectric.shadows.ShadowIntent;
 import org.robolectric.shadows.ShadowToast;
 
 import android.support.v7.widget.Toolbar;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 @RunWith(RobolectricTestRunner.class)
@@ -45,6 +49,8 @@ public class MainActivityTest {
 
     private Context context;
     private String etName;
+    private OrderActivity orderActivity;
+
 
     @Before
     public void setUp() throws Exception {
@@ -53,12 +59,8 @@ public class MainActivityTest {
                 .resume()
                 .get();
 
+        orderActivity = Robolectric.buildActivity(OrderActivity.class).create().resume().get();
 
-        context = ApplicationProvider.getApplicationContext();
-
-        sharedPreferences = context.getSharedPreferences(FILENAME, Context.MODE_PRIVATE);
-        // Ensure no shared preferences have leaked from previous tests.
-        assertThat(sharedPreferences.getAll()).hasSize(0);
     }
 
     @Test
@@ -84,33 +86,60 @@ public class MainActivityTest {
         //comparing actual vs expected
         assertThat(ShadowToast.getTextOfLatestToast(), equalTo("You ordered a FroYo.") );
     }
-
-
     @Test
     public void cartPageRemembersUSerInfo() throws Exception {
-
-//
-     //   Test that the app remembers the information the user entered on the Shopping Cart page.
-        //1.test the sharedpreferences are empty
-
+        //   Test that the app remembers the information the user entered on the Shopping Cart page.
+        //1.go to orders page
         //2.add some data
-        //3.check the data entered equals
-        //4.close the app and enter the order activity again
+        //2a.click the button to save
+        //3.go back to the page reenter the orderpage
+        //4.check the data entered using equals
         //5.check the data is still equals the last entered data
 
-        editor.commit();
-
-      SharedPreferences anotherSharedPreferences = context.getSharedPreferences(FILENAME, Context.MODE_PRIVATE);
-           assertTrue(anotherSharedPreferences.getString("string", "prudhvi")).isEqualTo(etName.getText().toString());
+        FloatingActionButton shoppingcartbtn = (FloatingActionButton) activity.findViewById(R.id.fab);
+        shoppingcartbtn.performClick();
 
 
-           SharedPreferences sharedPreferences = Robolectric.application.getSharedPreferences("you_custom_pref_name", Context.MODE_PRIVATE);
-           sharedPreferences.edit().putString("name", "prudhvi").commit();
-        assertThat(Shadow(etName).getText().toString(), equalTo("prudhvi") );
+//        sharedPref = ShadowPreferenceManager.getDefaultSharedPreferences(Robolectric.application.getApplicationContext());
+//        sharedPref.edit().putString("userName", "").commit();
 
 
 
+        //1.add some data
+        EditText Name = (EditText) orderActivity.findViewById(R.id.name_text);Name.setText("pokemon");
+        EditText address = (EditText) orderActivity.findViewById(R.id.address_text);address.setText("universe boss");
+        EditText Phone = (EditText) orderActivity.findViewById(R.id.phone_text);Phone.setText("12345678");
+        EditText Note = (EditText) orderActivity.findViewById(R.id.note_text);Note.setText("cartoon");
+        RadioButton checked = (RadioButton) orderActivity. findViewById(R.id.sameday);
+        checked.setChecked(true);
+
+
+        //2.save the details by clicking the button
+        Button save = (Button) orderActivity.findViewById(R.id.saveButton);
+        save.callOnClick();
+
+//3.go back and re-enter the orderspage
+        orderActivity.onBackPressed();
+        shoppingcartbtn.performClick();
+
+//4.check the data using assert equals
+        assertEquals("pokemon",Name.getText().toString());
+        assertEquals("universe boss",address.getText().toString());
+        assertEquals("12345678",Phone.getText().toString());
+        assertEquals("cartoon",Note.getText().toString());
+        assertTrue(checked.isChecked());
+
+//
+//        SharedPreferences sharedPref ;
+//        SharedPreferences.Editor editor = sharedPref.edit();
+//        editor.putString("name", etName.getText().toString());
+//        editor.putString("address",etAddress.getText().toString());
+//        editor.putString("phone",etPhone.getText().toString());
+//        editor.commit();
     }
 
 
 }
+
+
+
